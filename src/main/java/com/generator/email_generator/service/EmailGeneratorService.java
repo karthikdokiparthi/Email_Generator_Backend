@@ -20,8 +20,8 @@ public class EmailGeneratorService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
-    public EmailGeneratorService(WebClient webClient){
-        this.webClient=webClient;
+    public EmailGeneratorService(WebClient.Builder webClientBuilder){
+        this.webClient=webClientBuilder.build();
     }
 
     public String generateEmailReply(EmailRequest emailRequest){
@@ -31,7 +31,7 @@ public class EmailGeneratorService {
         //Craft a request
         Map<String,Object> requestBody=Map.of(
                 "contents",new Object[]{
-                      Map.of(  "paths",new Object[]{
+                      Map.of(  "parts",new Object[]{
                                Map.of( "text",prompt)
                 })
                 }
@@ -41,6 +41,7 @@ public class EmailGeneratorService {
         String response=webClient.post()
                 .uri(geminiApiUrl+geminiApiKey)
                 .header("Content-Type","application/json")
+                .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
